@@ -1,7 +1,8 @@
 module Util where
 
 import Control.Applicative
-import Data.List (intercalate)
+import Data.List (intercalate, sortBy, reverse)
+import Data.Maybe (listToMaybe)
 import Data.Ord (Ordering(..))
 
 import Text.Tabular
@@ -48,3 +49,12 @@ maxlength = foldr (comparelen GT) 0
 
 comparelen :: Ordering -> String -> Int -> Int
 comparelen ord s i = if compare (length s) i == ord then length s else i
+
+-- find function which finds first element based on order
+findOrd :: (a -> a -> Ordering) -> [a] -> Maybe a
+findOrd f = listToMaybe . sortBy f
+
+findLastOrd :: (a -> a -> Ordering) -> [a] -> Maybe a
+findLastOrd f = listToMaybe . reverse . sortBy f
+
+roundn n f = (fromInteger $ round $ f * (10^n)) / (10.0^^n)
