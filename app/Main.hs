@@ -5,6 +5,7 @@ import Data.List (sortBy)
 import Data.Ord (Down(..))
 
 import Lib
+import Renderable
 import Util
 
 frs = VStats "frs" 2750 200 10000
@@ -29,27 +30,27 @@ tracked = sortBy orderTV [ trackV (modV c5z "track" 350 400 5000) 400 8 400,
     trackV (modV s2k "NA" 180 200 5000) 250 4 300,
     trackV (modV miata "NA" 130 160 5000) 200 4 200 ]
 
+instance Row VStats where
+    header v                 = ["weight", "p2w", "cost", "$/hp", "spd/$"]
+    parts v@(VStats l w p c) = [show w, show (roundn 2 $ p2w v), show c, show (roundn 2 $ dhp v), show (floor $ spd v)]
+    label v@(VStats l _ _ _) = l
+
+instance Row TV where
+    header tv                 = ["weight", "p2w", "cost", "$/hp", "spd/$", "$/y"]
+    parts tv@(TV v initc cpy) = parts v{ worth = worth v + initc } ++ [show cpy]
+    label tv@(TV v _ _)       = label v
+
 main = do
-        putStrLn "Stock"
-        putStrLn (render $ vtable ["weight", "p2w", "cost", "$/hp", "spd/$"] label formatV vehs)
+    putStrLn "Stock"
+    render vehs
 
-        putStrLn "Tracked"
-        putStrLn (render $ vtable ["weight", "p2w", "cost", "$/hp", "spd/$", "$/y"] tlabel formatTV tracked)
+    putStrLn "Tracked"
+    render tracked
 
-        -- calculate some useful statistics
-        -- putStrLn "Fastest street car / $"
-        -- putStrLn $ show (findLastOrd (\v v' -> compare (spd v) (spd v')) vehs)
-        -- putStrLn "Fastest track car / $"
-        -- putStrLn $ show (findLastOrd (\v v' -> compare (spd $ tstats v) (spd $ tstats v')) tracked)
-        -- putStrLn "Cheapest track car w/ consumables"
-        -- TODO
-    where
-        formatV v@(VStats l w p c) = [show w, show (roundn 2 $ p2w v), show c, show (roundn 2 $ dhp v), show (floor $ spd v)]
-        formatTV tv@(TV v initc cpy) = formatV v{ worth = worth v + initc } ++ [show cpy]
-
-        -- format :: Show a => VStats -> [(VStats -> a)] -> [String]
-        -- format vst =
-
-        -- for pagination (not currently used)
-        printTable :: String -> IO ()
-        printTable t = putStrLn t >> putStrLn "Hit enter for more..." >> getLine >> return ()
+    -- calculate some useful statistics
+    -- putStrLn "Fastest street car / $"
+    -- putStrLn $ show (findLastOrd (\v v' -> compare (spd v) (spd v')) vehs)
+    -- putStrLn "Fastest track car / $"
+    -- putStrLn $ show (findLastOrd (\v v' -> compare (spd $ tstats v) (spd $ tstats v')) tracked)
+    -- putStrLn "Cheapest track car w/ consumables"
+    -- TODO

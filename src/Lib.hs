@@ -1,10 +1,7 @@
 module Lib where
 
-import Control.Monad (forM_)
-import Data.Bifunctor (bimap)
-
 data VStats = VStats {
-    label :: String,
+    vlabel :: String,
     weight :: Int,
     bhp :: Int,
     worth :: Int
@@ -14,7 +11,7 @@ data ModV = ModV { mstats :: VStats, cost :: Int } deriving (Show)
 data TV = TV { tstats :: VStats, initcost :: Int, costperyear :: Int } deriving (Show)
 
 modV :: VStats -> String -> Int -> Int -> Int -> ModV
-modV v@(VStats l w p c) l' fromWhp toWhp mcost = ModV { mstats = v{ bhp = mbhp, label = l ++ " " ++ l' }, cost = mcost }
+modV v@(VStats l w p c) l' fromWhp toWhp mcost = ModV { mstats = v{ bhp = mbhp, vlabel = l ++ " " ++ l' }, cost = mcost }
     where mbhp    = floor (fromIntegral p / mchange)
           mchange = (fromIntegral fromWhp / fromIntegral toWhp)
 
@@ -23,8 +20,6 @@ trackV mv@(ModV vst c) costpersess tiresperyear tirecost =
     let sessperyear = 12
         calcperyear = (costpersess * sessperyear) + (tiresperyear * tirecost)
     in TV { tstats = vst, initcost = c, costperyear = calcperyear }
-
-tlabel (TV v _ _) = label v
 
 p2w (VStats l w p _) = (fromIntegral w / fromIntegral p)
 dhp (VStats _ _ p c) = (fromIntegral c / fromIntegral p)
