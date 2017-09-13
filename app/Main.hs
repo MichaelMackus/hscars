@@ -28,15 +28,15 @@ loadVehicles path = do
         Left err -> putStrLn err >> return []
         Right (_, v) -> return (V.toList v)
 
-orderF = (*(-1)) . spd
-orderV v1 v2 = compare (orderF v1) (orderF v2)
+orderV v1 v2 = compare (f v1) (f v2)
+    where f = (*(-1)) . spd
 
 main = do
     putStrLn "Stock"
-    render =<< loadVehicles "cars/stock.csv"
+    render . sortBy orderV =<< loadVehicles "cars/stock.csv"
 
     putStrLn "Tracked"
-    render =<< loadVehicles "cars/modded.csv"
+    render . sortBy orderV =<< loadVehicles "cars/modded.csv"
 
     -- calculate some useful statistics
     -- putStrLn "Fastest street car / $"
