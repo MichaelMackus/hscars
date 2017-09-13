@@ -32,16 +32,21 @@ orderV v1 v2 = compare (f v1) (f v2)
     where f = (*(-1)) . spd
 
 main = do
+    let load p = return . sortBy orderV =<< loadVehicles p
+
+    stock  <- load "cars/stock.csv"
+    modded <- load "cars/modded.csv"
+
     putStrLn "Stock"
-    render . sortBy orderV =<< loadVehicles "cars/stock.csv"
+    render stock
+    putStrLn ""
+    putStrLn "Modified"
+    render modded
 
-    putStrLn "Tracked"
-    render . sortBy orderV =<< loadVehicles "cars/modded.csv"
-
-    -- calculate some useful statistics
-    -- putStrLn "Fastest street car / $"
-    -- putStrLn $ show (findLastOrd (\v v' -> compare (spd v) (spd v')) vehs)
-    -- putStrLn "Fastest track car / $"
-    -- putStrLn $ show (findLastOrd (\v v' -> compare (spd $ tstats v) (spd $ tstats v')) tracked)
-    -- putStrLn "Cheapest track car w/ consumables"
-    -- TODO
+--     -- calculate some useful statistics
+--     putStrLn "Fastest street car / $"
+--     print $ (findLastOrd (\v v' -> compare (spd v) (spd v')) stock)
+--     putStrLn "Fastest modded car / $"
+--     print $ (findLastOrd (\v v' -> compare (spd v) (spd v')) modded)
+--     -- putStrLn "Cheapest track car w/ consumables"
+--     -- TODO
