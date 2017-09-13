@@ -35,8 +35,8 @@ main = do
     putStrLn "Stock"
     render =<< loadVehicles "cars/stock.csv"
 
-    -- putStrLn "Tracked"
-    -- render =<< loadVehicles "cars/modded.csv"
+    putStrLn "Tracked"
+    render =<< loadVehicles "cars/modded.csv"
 
     -- calculate some useful statistics
     -- putStrLn "Fastest street car / $"
