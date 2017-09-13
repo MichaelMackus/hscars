@@ -7,6 +7,16 @@ import Data.List (intercalate)
 import Text.Tabular
 import qualified Text.Tabular.AsciiArt as A
 
+instance Row VStats where
+    header v                 = ["weight", "p2w", "cost", "spd/$"]
+    parts v@(VStats l w p c) = w +> roundn 2 (p2w v) <+> c <+> floor (spd v)
+    label v@(VStats l _ _ _) = l
+
+instance Row TV where
+    header tv                 = ["weight", "p2w", "cost", "spd/$", "$/y"]
+    parts tv@(TV v initc cpy) = parts v{ worth = worth v + initc } <+> cpy
+    label tv@(TV v _ _)       = label v
+
 class Renderable r where
     render :: r -> IO ()
 

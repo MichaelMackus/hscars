@@ -34,16 +34,6 @@ tracked = sortBy orderTV [ trackV (modV c5z "track" 0 400 5000) 400 8 400,
     trackV (modV s2k "NA" (-100) 200 5000) 250 4 300,
     trackV (modV miata "race" (-200) 160 10000) 200 4 200 ]
 
-instance Row VStats where
-    header v                 = ["weight", "p2w", "cost", "spd/$"]
-    parts v@(VStats l w p c) = w +> roundn 2 (p2w v) <+> c <+> floor (spd v)
-    label v@(VStats l _ _ _) = l
-
-instance Row TV where
-    header tv                 = ["weight", "p2w", "cost", "spd/$", "$/y"]
-    parts tv@(TV v initc cpy) = parts v{ worth = worth v + initc } <+> cpy
-    label tv@(TV v _ _)       = label v
-
 main = do
     putStrLn "Stock"
     render vehs
