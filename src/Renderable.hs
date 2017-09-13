@@ -3,33 +3,28 @@ module Renderable where
 import Lib
 import Util
 
-import Data.List (intercalate)
 import Text.Tabular
 import qualified Text.Tabular.AsciiArt as A
+
+class Renderable r where
+    table  :: r -> String
+    render :: r -> IO ()
+
+class Row r where
+    header :: r -> [String]
+    parts :: r -> [String]
+    label :: r -> String
 
 instance Row VStats where
     header v                 = ["weight", "p2w", "msrp", "cost", "spd/$"]
     parts v@(VStats l lbs _ p _ _) = lbs +> roundn 2 (p2w v) <+> p <+> cost v <+> floor (spd v)
     label v@(VStats l _   _ _ _ _) = l
 
--- instance Row TV where
---     header tv                 = ["weight", "p2w", "cost", "spd/$", "$/y"]
---     parts tv@(TV v initc cpy) = parts v{ worth = worth v + initc } <+> cpy
---     label tv@(TV v _ _)       = label v
-
-class Renderable r where
-    render :: r -> IO ()
-
 instance Row r => Renderable [r] where
-    render rs = putStrLn $ A.render id id id mkTable
-        where mkTable  = Table (Group NoLine mkLabels) (Group NoLine mkHeader) $ map parts rs
-              mkLabels = map (Header . label) rs
+    table rs = A.render id id id . Table (Group NoLine mkLabels) (Group NoLine mkHeader) $ map parts rs
+        where mkLabels = map (Header . label) rs
               mkHeader = map Header . header $ head rs
-
-class Row r where
-    header :: r -> [String]
-    parts :: r -> [String]
-    label :: r -> String
+    render = putStrLn . table
 
 -- helper to combine showables
 (<+>) :: Show a => [String] -> a -> [String]
