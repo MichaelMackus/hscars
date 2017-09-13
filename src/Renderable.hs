@@ -3,7 +3,9 @@ module Renderable where
 import Lib
 import Util
 
+import Data.List (sort)
 import Text.Tabular
+import qualified Text.PrettyPrint as Pretty
 import qualified Text.Tabular.AsciiArt as A
 
 class Renderable r where
@@ -21,10 +23,22 @@ instance Row VStats where
     label v@(VStats l _   _ _ _ _) = l
 
 instance Row r => Renderable [r] where
-    table rs = A.render id id id . Table (Group NoLine mkLabels) (Group NoLine mkHeader) $ map parts rs
+    table  = mkTable
+    render = putStrLn . table
+
+instance (Renderable r, Renderable r') => Renderable (r, r') where
+    table  (r, r') =
+        let (t,    t')       = (table r, table r')
+            docs             = map mkPretty (zip (lines t) (fill (lines t')))
+            mkPretty (l, l') = Pretty.text l Pretty.$$ Pretty.nest (maxWidth t + 5) (Pretty.text l')
+            maxWidth         = last . sort . map length . lines
+            fill          xs = xs ++ replicate ((length (lines t)) - length xs) ""
+        in  show (Pretty.vcat docs)
+    render = putStrLn . table
+
+mkTable rs = A.render id id id . Table (Group NoLine mkLabels) (Group NoLine mkHeader) $ map parts rs
         where mkLabels = map (Header . label) rs
               mkHeader = map Header . header $ head rs
-    render = putStrLn . table
 
 -- helper to combine showables
 (<+>) :: Show a => [String] -> a -> [String]
