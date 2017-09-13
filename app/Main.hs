@@ -5,6 +5,7 @@ module Main where
 import Control.Monad (forM_)
 import Data.Csv
 import Data.List (sortBy)
+import Data.Maybe (fromJust)
 import Data.Ord (Down(..))
 import qualified Data.ByteString.Lazy as BL
 import qualified Data.Vector as V
@@ -32,21 +33,18 @@ orderV v1 v2 = compare (f v1) (f v2)
     where f = (*(-1)) . spd
 
 main = do
-    let load p = return . sortBy orderV =<< loadVehicles p
+        let load p = return . sortBy orderV =<< loadVehicles p
 
-    stock  <- load "cars/stock.csv"
-    modded <- load "cars/modded.csv"
+        stock  <- load "cars/stock.csv"
+        modded <- load "cars/modded.csv"
 
-    putStrLn "Stock"
-    render stock
-    putStrLn ""
-    putStrLn "Modified"
-    render modded
+        putStrLn "Stock"
+        render (stock, stats stock)
+        putStrLn ""
+        putStrLn "Modified"
+        render (modded, stats modded)
+    where
+        stats :: [VStats] -> [TableRow]
+        stats vs = [TR ["car"] "Fastest / $" [show (fromJust (findLastOrd (\v v' -> compare (spd v) (spd v')) vs))]]
 
---     -- calculate some useful statistics
---     putStrLn "Fastest street car / $"
---     print $ (findLastOrd (\v v' -> compare (spd v) (spd v')) stock)
---     putStrLn "Fastest modded car / $"
---     print $ (findLastOrd (\v v' -> compare (spd v) (spd v')) modded)
---     -- putStrLn "Cheapest track car w/ consumables"
---     -- TODO
+        -- TODO "Cheapest track car w/ consumables"

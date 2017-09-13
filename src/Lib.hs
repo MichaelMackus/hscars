@@ -7,7 +7,10 @@ data VStats = VStats {
     msrp :: Int,
     worth :: Int,
     modCost :: Maybe Int
-} deriving (Show)
+}
+
+instance Show VStats where
+    show = vlabel
 
 cost :: VStats -> Int
 cost v =
