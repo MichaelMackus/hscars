@@ -17,11 +17,6 @@ class Row r where
     parts :: r -> [String]
     label :: r -> String
 
-instance Row VStats where
-    header v                 = ["weight", "p2w", "msrp", "cost", "spd/$"]
-    parts v@(VStats l lbs _ p _ _) = lbs +> roundn 2 (p2w v) <+> p <+> cost v <+> floor (spd v)
-    label v@(VStats l _   _ _ _ _) = l
-
 instance Row r => Renderable [r] where
     table  = mkTable
     render = putStrLn . table

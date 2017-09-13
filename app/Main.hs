@@ -10,6 +10,7 @@ import qualified Data.Vector as V
 
 import Lib
 import Renderable
+import Util
 
 instance FromNamedRecord VStats where
     parseNamedRecord r = VStats <$> r .: "car"
@@ -18,6 +19,8 @@ instance FromNamedRecord VStats where
                                 <*> r .: "msrp"
                                 <*> r .: "worth"
                                 <*> r .: "mods"
+                                <*> r .: "mpg"
+                                <*> r .: "tires"
 
 loadVehicles :: FilePath -> IO [VStats]
 loadVehicles path = do
@@ -28,6 +31,18 @@ loadVehicles path = do
 
 orderV v1 v2 = compare (f v1) (f v2)
     where f = (*(-1)) . spd
+
+instance Row VStats where
+    header v = ["weight", "p2w", "msrp", "cost", "$/y", "spd/$"]
+    parts  v = weight v +> roundn 2 (p2w v) <+> msrp v <+> cost v <+> cpy v <+> floor (spd v)
+    label  v = vlabel v
+
+-- cheater costPerY
+cpy v = costPerY v miles tireChanges gasCost
+    where
+        miles       = 15000
+        tireChanges = if bhp v >= 400 then 6 else 4
+        gasCost     = 4
 
 main = do
         let load p = return . sortBy orderV =<< loadVehicles p
@@ -42,9 +57,10 @@ main = do
         render (modded, stats modded)
     where
         stats :: [VStats] -> [TableRow]
-        stats vs = [TR ["car"] "Fastest / $"    [showv (findLComparing spd vs)],
-                    TR ["car"] "Power / Weight" [showv (findLComparing speed vs)],
-                    TR ["car"] "Cheapest Cost"  [showv (findFComparing cost vs)]]
+        stats vs = [TR ["car"] "Fastest / $"          [showv (findLComparing spd vs)],
+                    TR ["car"] "Power / Weight"       [showv (findLComparing speed vs)],
+                    TR ["car"] "Cheapest Cost"        [showv (findFComparing cost vs)],
+                    TR ["car"] "Cheapest Consumables" [showv (findFComparing cpy vs)]]
 
             where
                 showv = show . fromJust

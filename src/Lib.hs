@@ -6,16 +6,21 @@ data VStats = VStats {
     bhp :: Int,
     msrp :: Int,
     worth :: Int,
-    modCost :: Maybe Int
+    modCost :: Int,
+    mpg :: Int,
+    tireCost :: Int
 }
 
 instance Show VStats where
     show = vlabel
 
 cost :: VStats -> Int
-cost v =
-    let mods = maybe 0 id (modCost v)
-    in  worth v + mods
+cost v = worth v + modCost v
+
+-- cost per year
+costPerY :: VStats -> Int -> Int -> Int -> Int
+costPerY v miles tireChanges gasCost = floor ((fromIntegral miles / fromIntegral (mpg v)) * (fromIntegral gasCost)) + (tireCost v * tireChanges)
+
 
 -- power to weight
 p2w v = (fromIntegral (weight v) / fromIntegral (bhp v))
