@@ -11,9 +11,7 @@ data ModV = ModV { mstats :: VStats, cost :: Int } deriving (Show)
 data TV = TV { tstats :: VStats, initcost :: Int, costperyear :: Int } deriving (Show)
 
 modV :: VStats -> String -> Int -> Int -> Int -> ModV
-modV v@(VStats l w p c) l' fromWhp toWhp mcost = ModV { mstats = v{ bhp = mbhp, vlabel = l ++ " " ++ l' }, cost = mcost }
-    where mbhp    = floor (fromIntegral p / mchange)
-          mchange = (fromIntegral fromWhp / fromIntegral toWhp)
+modV v@(VStats l w p c) l' wdiff whp mcost = ModV { mstats = v{ bhp = whp, vlabel = l ++ " " ++ l', weight = w + wdiff }, cost = mcost }
 
 trackV :: ModV -> Int -> Int -> Int -> TV
 trackV mv@(ModV vst c) costpersess tiresperyear tirecost =

@@ -20,3 +20,24 @@ class Row r where
     header :: r -> [String]
     parts :: r -> [String]
     label :: r -> String
+
+-- helper to combine showables
+(<+>) :: Show a => [String] -> a -> [String]
+l <+> s = l ++ [show s]
+infixl 5 <+>
+
+(+>) :: (Show a, Show b) => a -> b -> [String]
+(+>) a b = [show a, show b]
+infixl 5 +>
+
+-- basic renderable data structure
+data TableRow = TR {
+    th :: [String],
+    tlabel :: String,
+    td :: [String]
+}
+
+instance Row TableRow where
+    header = th
+    parts  = td
+    label  = tlabel
