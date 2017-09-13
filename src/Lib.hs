@@ -4,28 +4,22 @@ data VStats = VStats {
     vlabel :: String,
     weight :: Int,
     bhp :: Int,
-    worth :: Int
+    msrp :: Int,
+    worth :: Int,
+    modCost :: Maybe Int
 } deriving (Show)
 
-data ModV = ModV { mstats :: VStats, cost :: Int } deriving (Show)
-data TV = TV { tstats :: VStats, initcost :: Int, costperyear :: Int } deriving (Show)
+cost :: VStats -> Int
+cost v =
+    let mods = maybe 0 id (modCost v)
+    in  worth v + mods
 
-modV :: VStats -> String -> Int -> Int -> Int -> ModV
-modV v@(VStats l w p c) l' wdiff whp mcost = ModV { mstats = v{ bhp = whp, vlabel = l ++ " " ++ l', weight = w + wdiff }, cost = mcost }
-
-trackV :: ModV -> Int -> Int -> Int -> TV
-trackV mv@(ModV vst c) costpersess tiresperyear tirecost =
-    let sessperyear = 12
-        calcperyear = (costpersess * sessperyear) + (tiresperyear * tirecost)
-    in TV { tstats = vst, initcost = c, costperyear = calcperyear }
-
-p2w (VStats l w p _) = (fromIntegral w / fromIntegral p)
-dhp (VStats _ _ p c) = (fromIntegral c / fromIntegral p)
+-- power to weight
+p2w v = (fromIntegral (weight v) / fromIntegral (bhp v))
 -- speed is calculated as a division of p2w (greater speed = faster/lower p2w)
 speed v = (1 / p2w v) * 1000
+
 -- speed per dollar
-spd v@(VStats _ _ _ c) = (speed v / fromIntegral c) * 10000
--- ownership offset of current cars worth
--- mdhp v@(V l _ p c) = dhp v{worth = c - (worth frs) }
-mdhp v@(VStats l _ p c) = dhp v{worth = c - 10000 }
-mspd v@(VStats l _ p c) = spd v{worth = c - 10000 }
+spd v = (speed v / fromIntegral (cost v)) * 10000
+-- dollar per hp
+dhp v = (fromIntegral (cost v) / fromIntegral (bhp v))
