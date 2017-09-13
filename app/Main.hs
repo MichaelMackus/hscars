@@ -2,17 +2,14 @@
 
 module Main where
 
-import Control.Monad (forM_)
 import Data.Csv
 import Data.List (sortBy)
-import Data.Maybe (fromJust)
-import Data.Ord (Down(..))
+import Data.Maybe (fromJust, listToMaybe)
 import qualified Data.ByteString.Lazy as BL
 import qualified Data.Vector as V
 
 import Lib
 import Renderable
-import Util
 
 instance FromNamedRecord VStats where
     parseNamedRecord r = VStats <$> r .: "car"
@@ -45,6 +42,12 @@ main = do
         render (modded, stats modded)
     where
         stats :: [VStats] -> [TableRow]
-        stats vs = [TR ["car"] "Fastest / $" [show (fromJust (findLastOrd (\v v' -> compare (spd v) (spd v')) vs))]]
+        stats vs = [TR ["car"] "Fastest / $"    [showv (findLComparing spd vs)],
+                    TR ["car"] "Power / Weight" [showv (findLComparing speed vs)],
+                    TR ["car"] "Cheapest Cost"  [showv (findFComparing cost vs)]]
 
-        -- TODO "Cheapest track car w/ consumables"
+            where
+                showv = show . fromJust
+                findComparing  f = sortBy (\v v' -> compare (f v) (f v'))
+                findFComparing f = listToMaybe . findComparing f
+                findLComparing f = listToMaybe . reverse . findComparing f
