@@ -8,6 +8,7 @@ import Data.Maybe (fromJust, listToMaybe)
 import qualified Data.ByteString.Lazy as BL
 import qualified Data.Vector as V
 
+import Args (getArgs, sort)
 import Lib
 import Renderable
 
@@ -28,16 +29,16 @@ loadVehicles path = do
         Left err -> putStrLn err >> return []
         Right (_, v) -> return (V.toList v)
 
-orderV v1 v2 = compare (f v1) (f v2)
-    where f = (*(-1)) . spd
-
 instance Row VStats where
     header v = ["weight", "p2w", "msrp", "cost", "$/y", "spd/$"]
     parts  v = weight v +> roundn 2 (p2w v) <+> msrp v <+> cost v <+> cpy v <+> floor (spd v)
+        where roundn n f = (fromInteger $ round $ f * (10^n)) / (10.0^^n)
     label  v = vlabel v
 
 main = do
-        let load p = return . sortBy orderV =<< loadVehicles p
+        args <- getArgs
+
+        let load p = return . sortBy (sort args) =<< loadVehicles p
 
         stock  <- load "cars/stock.csv"
         modded <- load "cars/modded.csv"
@@ -59,14 +60,4 @@ main = do
                 findComparing  f = sortBy (\v v' -> compare (f v) (f v'))
                 findFComparing f = listToMaybe . findComparing f
                 findLComparing f = listToMaybe . reverse . findComparing f
-
--- misc
-
--- cheater costPerY
-cpy v = costPerY v miles tireChanges gasCost
-    where
-        miles       = 15000
-        tireChanges = if bhp v >= 400 then 6 else 4
-        gasCost     = 4
-roundn n f = (fromInteger $ round $ f * (10^n)) / (10.0^^n)
 

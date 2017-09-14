@@ -21,6 +21,12 @@ cost v = worth v + modCost v
 costPerY :: VStats -> Int -> Int -> Int -> Int
 costPerY v miles tireChanges gasCost = floor ((fromIntegral miles / fromIntegral (mpg v)) * (fromIntegral gasCost)) + (tireCost v * tireChanges)
 
+-- cheater costPerY
+cpy v = costPerY v miles tireChanges gasCost
+    where
+        miles       = 15000
+        tireChanges = if bhp v >= 400 then 6 else 4
+        gasCost     = 4
 
 -- power to weight
 p2w v = (fromIntegral (weight v) / fromIntegral (bhp v))
