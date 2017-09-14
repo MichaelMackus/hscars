@@ -1,8 +1,5 @@
 module Renderable where
 
-import Lib
-import Util
-
 import Data.List (sort)
 import Text.Tabular
 import qualified Text.PrettyPrint as Pretty
@@ -21,6 +18,19 @@ instance Row r => Renderable [r] where
     table  = mkTable
     render = putStrLn . table
 
+-- basic renderable data structure
+data TableRow = TR {
+    th :: [String],
+    tlabel :: String,
+    td :: [String]
+}
+
+instance Row TableRow where
+    header = th
+    parts  = td
+    label  = tlabel
+
+-- allow rendering two instances side by side
 instance (Renderable r, Renderable r') => Renderable (r, r') where
     table  (r, r') =
         let (t,    t')       = (table r, table r')
@@ -43,15 +53,3 @@ infixl 5 <+>
 (+>) :: (Show a, Show b) => a -> b -> [String]
 (+>) a b = [show a, show b]
 infixl 5 +>
-
--- basic renderable data structure
-data TableRow = TR {
-    th :: [String],
-    tlabel :: String,
-    td :: [String]
-}
-
-instance Row TableRow where
-    header = th
-    parts  = td
-    label  = tlabel
